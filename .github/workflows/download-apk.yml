@@ -25,6 +25,7 @@ jobs:
           import java.net.http.HttpRequest;
           import java.net.http.HttpResponse;
           import java.nio.file.Files;
+          import java.nio.file.StandardCopyOption;
           import java.nio.file.Paths;
 
           public class Downloader {
@@ -35,12 +36,13 @@ jobs:
                           .build();
                   var request = HttpRequest.newBuilder()
                           .uri(URI.create(url))
-                          .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                          .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
+                          .header("Referer", "https://apkpure.com/")
                           .build();
                   var response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
                   
                   if (response.statusCode() == 200) {
-                      Files.copy(response.body(), Paths.get("battlecats.xapk"));
+                      Files.copy(response.body(), Paths.get("battlecats.xapk"), StandardCopyOption.REPLACE_EXISTING);
                   } else {
                       System.err.println("Failed to download: " + response.statusCode());
                       System.exit(1);
