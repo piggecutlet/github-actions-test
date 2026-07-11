@@ -30,10 +30,21 @@ jobs:
           public class Downloader {
               public static void main(String[] args) throws Exception {
                   var url = "https://d.apkpure.com/b/XAPK/jp.co.ponos.battlecats?versionCode=1504020&nc=arm64-v8a&sv=24";
-                  var client = HttpClient.newHttpClient();
-                  var request = HttpRequest.newBuilder().uri(URI.create(url)).build();
+                  var client = HttpClient.newBuilder()
+                          .followRedirects(HttpClient.Redirect.NORMAL)
+                          .build();
+                  var request = HttpRequest.newBuilder()
+                          .uri(URI.create(url))
+                          .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                          .build();
                   var response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
-                  Files.copy(response.body(), Paths.get("battlecats.xapk"));
+                  
+                  if (response.statusCode() == 200) {
+                      Files.copy(response.body(), Paths.get("battlecats.xapk"));
+                  } else {
+                      System.err.println("Failed to download: " + response.statusCode());
+                      System.exit(1);
+                  }
               }
           }
           EOF
@@ -42,8 +53,8 @@ jobs:
           
       - name: Commit APK
         run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
+          git config user.name github-actions[bot]
+          git config user.email github-actions[bot]@users.noreply.github.com
           git add battlecats.xapk
           git commit -m "Download new APK"
           git push
