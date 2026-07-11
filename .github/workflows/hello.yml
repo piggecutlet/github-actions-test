@@ -6,5 +6,11 @@ jobs:
   say-hello:
     runs-on: ubuntu-latest
     steps:
-      - name: Run script
+      - name: Check OS
+        run: cat /etc/os-release
+      - name: Echo
         run: echo "Hello World"
+      - name: Check Java
+        run: java -version
+      - name: Check Python
+        run: python --version
