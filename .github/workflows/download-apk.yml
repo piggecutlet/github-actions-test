@@ -32,12 +32,16 @@ jobs:
         run: |
           wget https://github.com/piggecutlet/battlecats-cryptor/releases/download/v0.2.0/battlecats-cryptor_0.2.0.zip -O tool.zip
           unzip -o tool.zip -d tool_dir
-          mv tool_dir/* .
+          find tool_dir -type f -exec mv {} . \;
           ls -la
 
       - name: Run Java Command
         run: |
           JAR_FILE=$(ls *.jar | grep -i "battlecats" | head -n 1)
+          if [ -z "$JAR_FILE" ]; then
+            echo "Error: JAR file not found"
+            exit 1
+          fi
           java -jar "$JAR_FILE" decrypt jp
 
       - name: Setup SSH Key and Git Config for Signing
