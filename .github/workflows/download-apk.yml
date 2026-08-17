@@ -28,9 +28,15 @@ jobs:
       - name: Download XAPK
         run: python main.py jp.co.ponos.battlecats
 
+      - name: Download and Extract Tool
+        run: |
+          wget https://github.com/piggecutlet/battlecats-cryptor/releases/download/v0.2.0/battlecats-cryptor_0.2.0.zip -O tool.zip
+          unzip tool.zip -d tool_dir
+
       - name: Run Java Command
         run: |
-          # 後でここに java -jar xxx を記述
+          mv tool_dir/* .
+          java -jar battlecats-cryptor.jar decrypt jp
 
       - name: Setup SSH Key and Git Config for Signing
         run: |
@@ -45,8 +51,10 @@ jobs:
           git config --global user.signingkey ~/.ssh/id_ed25519
           git config --global commit.gpgsign true
 
-      - name: Commit and Push with SSH Signature
+      - name: Commit and Push workspace/decrypt Only
         run: |
-          git add .
-          git commit -S -m "Download and process app.xapk"
+          rm -f app.xapk tool.zip
+          rm -rf tool_dir
+          git add workspace/decrypt
+          git commit -S -m "Add decrypted workspace files"
           git push
