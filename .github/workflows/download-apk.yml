@@ -35,7 +35,7 @@ jobs:
           cp -r tool_dir/battlecats-cryptor_0.2.0/* . 2>/dev/null || cp -r tool_dir/* .
           ls -la
 
-      - name: Run Cryptor Command
+      - name: Run Cryptor Command for APK (Local)
         run: |
           JAR_FILE=$(ls *.jar | grep -i "battlecats-cryptor" | head -n 1)
           if [ -z "$JAR_FILE" ]; then
@@ -43,11 +43,25 @@ jobs:
             exit 1
           fi
           java -jar "$JAR_FILE" decrypt jp
+          mkdir -p jp/local
+          cp -r workspace/decrypt/* jp/local/
+          rm -rf workspace/decrypt
 
       - name: Download and Run Server Assets Downloader
         run: |
           wget https://github.com/piggecutlet/battlecats-server-assets-downloader/releases/download/v0.1.0/battlecats-server-assets-downloader_v0.1.0.jar -O battlecats-server-assets-downloader.jar
           java -jar battlecats-server-assets-downloader.jar
+
+      - name: Run Cryptor Command for Server Assets
+        run: |
+          JAR_FILE=$(ls *.jar | grep -i "battlecats-cryptor" | head -n 1)
+          # 復号対象（assets/jp）を workspace/encrypt に移動し、APK/XAPKを削除して復号実行
+          mkdir -p workspace/encrypt
+          cp -r assets/jp/* workspace/encrypt/ 2>/dev/null || true
+          rm -f *.xapk *.apk
+          java -jar "$JAR_FILE" decrypt jp
+          mkdir -p jp/server
+          cp -r workspace/decrypt/* jp/server/
 
       - name: Setup SSH Key and Git Config for Signing
         run: |
@@ -62,10 +76,10 @@ jobs:
           git config --global user.signingkey ~/.ssh/id_ed25519
           git config --global commit.gpgsign true
 
-      - name: Commit and Push Decrypted Files and Assets
+      - name: Commit and Push
         run: |
-          rm -f app.xapk tool.zip battlecats-server-assets-downloader.jar
-          rm -rf tool_dir lib
-          git add workspace/decrypt assets
-          git commit -S -m "Add decrypted workspace files and server assets"
+          rm -f tool.zip battlecats-server-assets-downloader.jar
+          rm -rf tool_dir lib workspace assets
+          git add jp/local jp/server
+          git commit -S -m "Add decrypted local and server assets"
           git push
