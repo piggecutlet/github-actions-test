@@ -1,4 +1,3 @@
-# https://github.com/actions/runner-images/tree/main
 name: Hello Workflow
 on:
   workflow_dispatch:
@@ -9,9 +8,12 @@ jobs:
     steps:
       - name: Check OS
         run: cat /etc/os-release
+  
       - name: Echo
         run: echo "Hello World"
+      
       - name: Check Java
         run: java -version
+      
       - name: Check Python
         run: python --version
