@@ -11,17 +11,42 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download APK
-        run: |
-          curl -L -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36" \
-          -H "Referer: https://apkpure.com/" \
-          "https://d.apkpure.com/b/XAPK/jp.co.ponos.battlecats?versionCode=1504020&nc=arm64-v8a&sv=24" \
-          -o battlecats.xapk
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
 
-      - name: Commit APK
+      - name: Install Python Dependencies
+        run: pip install requests
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Download XAPK
+        run: python main.py jp.co.ponos.battlecats
+
+      - name: Run Java Command
         run: |
-          git config user.name github-actions[bot]
-          git config user.email github-actions[bot]@users.noreply.github.com
-          git add battlecats.xapk
-          git commit -m "Download new APK"
+          # 後でここに java -jar xxx を記述
+
+      - name: Setup SSH Key and Git Config for Signing
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          echo "${{ secrets.SSH_PUBLIC_KEY }}" > ~/.ssh/id_ed25519.pub
+
+          git config --global user.name "piggecutlet"
+          git config --global user.email "234113501+piggecutlet@users.noreply.github.com"
+          git config --global gpg.format ssh
+          git config --global user.signingkey ~/.ssh/id_ed25519
+          git config --global commit.gpgsign true
+
+      - name: Commit and Push with SSH Signature
+        run: |
+          git add .
+          git commit -S -m "Download and process app.xapk"
           git push
