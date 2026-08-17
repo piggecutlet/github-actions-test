@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: '25'
 
       - name: Download XAPK
         run: python main.py jp.co.ponos.battlecats
