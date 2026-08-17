@@ -32,11 +32,11 @@ jobs:
         run: |
           wget https://github.com/piggecutlet/battlecats-cryptor/releases/download/v0.2.0/battlecats-cryptor_0.2.0.zip -O tool.zip
           unzip tool.zip -d tool_dir
+          find tool_dir -type f -exec mv {} . \;
 
       - name: Run Java Command
         run: |
-          mv tool_dir/* .
-          java -jar battlecats-cryptor.jar decrypt jp
+          java -jar battlecats-cryptor_0.2.0.jar decrypt jp
 
       - name: Setup SSH Key and Git Config for Signing
         run: |
