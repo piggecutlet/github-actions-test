@@ -32,7 +32,8 @@ jobs:
         run: |
           wget https://github.com/piggecutlet/battlecats-cryptor/releases/download/v0.2.0/battlecats-cryptor_0.2.0.zip -O tool.zip
           unzip -o tool.zip -d tool_dir
-          find tool_dir -type f -exec mv {} . \;
+          # ディレクトリ構造（lib等）を保持したまま移動
+          cp -r tool_dir/battlecats-cryptor_0.2.0/* . 2>/dev/null || cp -r tool_dir/* .
           ls -la
 
       - name: Run Java Command
@@ -60,7 +61,7 @@ jobs:
       - name: Commit and Push workspace/decrypt Only
         run: |
           rm -f app.xapk tool.zip
-          rm -rf tool_dir
+          rm -rf tool_dir lib
           git add workspace/decrypt
           git commit -S -m "Add decrypted workspace files"
           git push
